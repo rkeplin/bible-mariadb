@@ -1,7 +1,6 @@
 # Bible MariaDB
 
-Bible MariaDB contains multiple translations of the Holy Bible, as well as cross-references. 
-All of the data was gathered from the MySQL database found [here](https://github.com/scrollmapper/bible_databases).
+Bible MariaDB contains multiple translations of the Holy Bible, as well as cross-references.
 This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY.
 
 ### Included Translations
@@ -24,6 +23,9 @@ When running a container, all of the environment variables from [MariaDB](https:
 * [Bible PHP API](https://www.github.com/rkeplin/bible-php-api)
 * [Bible AngularJS UI](https://www.github.com/rkeplin/bible-angularjs-ui)
 * [Bible MariaDB Docker Image](https://www.github.com/rkeplin/bible-mariadb)
+
+### Credits
+All of the data was gathered from the MySQL database found [here](https://github.com/scrollmapper/bible_databases).
 
 ### License
 This program is free software: you can redistribute it and/or modify
