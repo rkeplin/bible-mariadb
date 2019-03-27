@@ -4,6 +4,14 @@ Bible MariaDB contains multiple translations of the Holy Bible, as well as cross
 All of the data was gathered from the MySQL database found [here](https://github.com/scrollmapper/bible_databases).
 This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY.
 
+### Included Translations
+* American Standard-ASV1901 (ASV)
+* Bible in Basic English (BBE)
+* Darby English Bible (DARBY)
+* King James Version (KJV)
+* World English Bible (WEB)
+* Young's Literal Translation (YLT)
+
 ### Getting Started
 ```bash
 git clone https://www.github.com/rkeplin/bible-mariadb
