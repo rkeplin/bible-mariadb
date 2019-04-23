@@ -28,7 +28,9 @@ When running a container, all of the environment variables from [MariaDB](https:
 * [Bible MariaDB Docker Image](https://www.github.com/rkeplin/bible-mariadb)
 
 ### Credits
-All of the data was gathered from the MySQL database found [here](https://github.com/scrollmapper/bible_databases).
+Data was gathered from the following repositories.
+* [scrollmaper/bible_database](https://github.com/scrollmapper/bible_databases)
+* [honza/bibles](https://github.com/honza/bibles)
 
 ### License
 This program is free software: you can redistribute it and/or modify
