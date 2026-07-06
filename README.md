@@ -12,6 +12,7 @@ This program is distributed in the hope that it will be useful, but WITHOUT ANY 
 * Young's Literal Translation (YLT)
 * New International Version (NIV)
 * New Living Translation (NLT)
+* New Living Translation, 2015 Update (NLT2015)
 
 ### Getting Started
 ```bash

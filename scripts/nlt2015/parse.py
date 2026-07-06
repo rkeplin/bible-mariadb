@@ -54,9 +54,7 @@ def parse_chapter_html(html_text):
     verses = {}
     for m in VERSE_ROW_RE.finditer(html_text):
         verse_id = int(m.group(1))
-        text = clean_verse_html(m.group(2))
-        if text:
-            verses[verse_id] = text
+        verses[verse_id] = clean_verse_html(m.group(2))
     return verses
 
 

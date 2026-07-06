@@ -1,10 +1,11 @@
 """Extract the ground-truth book/chapter/verse structure from the existing
 `t_nlt` table in initdb.d/seed.sql, so the new NLT-2015 scrape can be
-validated to have the exact same shape (same books, same chapter counts,
-same verse counts per chapter).
+validated to have the exact same shape (same books, same chapters, and the
+exact same set of verse ids per chapter - note some chapters have gaps,
+e.g. Numbers 1 skips verse ids 21/23/25/.../43 entirely).
 
 Usage: python3 extract_structure.py
-Writes: data/nlt_structure.json  { "<bookId>": { "<chapterId>": maxVerseId, ... }, ... }
+Writes: data/nlt_structure.json  { "<bookId>": { "<chapterId>": [verseId, ...], ... }, ... }
 """
 import json
 import re
@@ -29,19 +30,22 @@ def main():
     if not inserts:
         raise SystemExit("No INSERT statements found for t_nlt")
 
-    struct = defaultdict(dict)
+    struct = defaultdict(lambda: defaultdict(list))
     total_verses = 0
     for ins in inserts:
         for row in split_tuples(ins):
             rid, book_id, chapter_id, verse_id, _verse = row.split(",", 4)
             book_id, chapter_id, verse_id = int(book_id), int(chapter_id), int(verse_id)
-            struct[book_id][chapter_id] = max(struct[book_id].get(chapter_id, 0), verse_id)
+            struct[book_id][chapter_id].append(verse_id)
             total_verses += 1
 
-    out = {str(b): {str(c): v for c, v in sorted(chs.items())} for b, chs in sorted(struct.items())}
+    out = {
+        str(b): {str(c): sorted(verse_ids) for c, verse_ids in sorted(chs.items())}
+        for b, chs in sorted(struct.items())
+    }
 
     OUT.parent.mkdir(parents=True, exist_ok=True)
-    OUT.write_text(json.dumps(out, indent=2))
+    OUT.write_text(json.dumps(out, indent=1))
 
     total_chapters = sum(len(v) for v in struct.values())
     print(f"books={len(struct)} chapters={total_chapters} verses={total_verses}")

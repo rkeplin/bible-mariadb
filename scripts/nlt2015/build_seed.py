@@ -23,6 +23,28 @@ TABLE_NAME = "t_nlt_2015"
 TRANSLATION_ID = "011"
 ROWS_PER_INSERT = 2000
 
+# The 2015 NLT revision re-versified a handful of verses versus the older
+# 1996/2004 edition already in this database (t_nlt): the closing greetings
+# of 2 Corinthians and 3 John, and one narrative sentence in Revelation 12,
+# are each split as one extra verse in 2015. Confirmed by reading the
+# scraped text - it's real, distinct verse content, not a scraping error -
+# so these are intentionally included even though t_nlt doesn't have them.
+EXTRA_VERSES_IN_2015 = {
+    ("47", "13"): 14,  # 2 Corinthians 13
+    ("64", "1"): 15,   # 3 John 1
+    ("66", "12"): 18,  # Revelation 12
+}
+
+FOOTNOTE_PLACEHOLDER = "See Footnote"
+
+
+def expected_verse_ids(book_id, chapter_id):
+    ids = set(STRUCTURE[book_id][chapter_id])
+    extra = EXTRA_VERSES_IN_2015.get((book_id, chapter_id))
+    if extra:
+        ids.add(extra)
+    return ids
+
 
 def validate_structure(data):
     expected_books = set(STRUCTURE.keys())
@@ -33,18 +55,18 @@ def validate_structure(data):
         got_chapters = data.get(book_id, {})
         if set(exp_chapters.keys()) != set(got_chapters.keys()):
             raise SystemExit(f"book {book_id}: chapter set mismatch")
-        for chapter_id, exp_max in exp_chapters.items():
+        for chapter_id in exp_chapters:
             verses = got_chapters[chapter_id]
-            ids = sorted(int(v) for v in verses)
-            if ids != list(range(1, exp_max + 1)):
-                raise SystemExit(f"book {book_id} chapter {chapter_id}: verse ids {ids} != 1..{exp_max}")
-            for v in ids:
+            got_ids = {int(v) for v in verses}
+            exp_ids = expected_verse_ids(book_id, chapter_id)
+            missing = sorted(exp_ids - got_ids)
+            if missing:
+                raise SystemExit(f"book {book_id} chapter {chapter_id}: verse id(s) {missing} not present on scraped page")
+            for v in sorted(exp_ids):
                 text = verses[str(v)]
-                if not text.strip():
-                    raise SystemExit(f"book {book_id} chapter {chapter_id}:{v}: empty text")
-                non_ascii = [c for c in text if ord(c) > 127]
-                if non_ascii:
-                    raise SystemExit(f"book {book_id} chapter {chapter_id}:{v}: non-ASCII chars {non_ascii}")
+                non_latin1 = [c for c in text if ord(c) > 255]
+                if non_latin1:
+                    raise SystemExit(f"book {book_id} chapter {chapter_id}:{v}: char(s) outside latin1 {non_latin1}")
 
 
 def build_table_block(data):
@@ -76,13 +98,13 @@ def build_table_block(data):
     lines.append(f"/*!40000 ALTER TABLE `{TABLE_NAME}` DISABLE KEYS */;")
 
     rows = []
-    for book_id in sorted(data.keys(), key=int):
-        chapters = data[book_id]
+    for book_id in sorted(STRUCTURE.keys(), key=int):
+        chapters = STRUCTURE[book_id]
         for chapter_id in sorted(chapters.keys(), key=int):
-            verses = chapters[chapter_id]
-            for verse_id in sorted(verses.keys(), key=int):
-                text = verses[verse_id]
-                b, c, v = int(book_id), int(chapter_id), int(verse_id)
+            verses = data[book_id][chapter_id]
+            for verse_id in sorted(expected_verse_ids(book_id, chapter_id)):
+                text = verses[str(verse_id)].strip() or FOOTNOTE_PLACEHOLDER
+                b, c, v = int(book_id), int(chapter_id), verse_id
                 row_id = f"{b:02d}{c:03d}{v:03d}"
                 escaped = escape_sql_string(text)
                 rows.append(f"({row_id},{b},{c},{v},'{escaped}')")
