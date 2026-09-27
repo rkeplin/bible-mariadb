@@ -1,3 +1,3 @@
-FROM mariadb:10.4.2-bionic
+FROM mariadb:10.11
 
 COPY ./initdb.d/ /docker-entrypoint-initdb.d
